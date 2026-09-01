@@ -42,6 +42,11 @@ close_pane = "prefix+shift+x"
 # prefix+c freed up by moving new_tab to t — reuse the tmux new-window reflex for new spaces
 new_workspace = "prefix+c"
 
+# Cycle focus through live agents (any space), vim j/k style; alt+1..9 jumps to the Nth agent row
+next_agent = "prefix+shift+j"
+previous_agent = "prefix+shift+k"
+focus_agent = "prefix+alt+1..9"
+
 # Navigate mode (opened via prefix+w / prefix+g): vim-style j/k to flip workspaces.
 # Arrows still work (left/right always focus panes, up/down workspaces).
 navigate_workspace_up = "k"
