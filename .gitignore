@@ -1,0 +1,5 @@
+# runtime state — machine-local, never commit
+*.log
+*.sock
+session.json
+.plugins.lock
