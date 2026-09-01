@@ -50,3 +50,12 @@ navigate_workspace_down = "j"
 # (arrow keys still focus panes; ctrl+hjkl handles pane focus outside navigate mode anyway)
 navigate_pane_down = ""
 navigate_pane_up = ""
+
+[theme]
+name = "one-dark"
+auto_switch = false
+
+[ui]
+# tmux-style splits: shared divider lines, no gaps, no outer frame
+pane_gaps = false
+pane_outer_borders = false
