@@ -17,5 +17,13 @@ grep -vE '^\s*(#|$)' plugins.txt | while IFS='@' read -r repo ref; do
   herdr plugin install "$repo" --ref "$ref" --yes
 done
 
+# auto-title reads ~/.config/herdr-auto-title/config.env; keep the tracked one there.
+mkdir -p ~/.config/herdr-auto-title
+ln -sfn "$PWD/auto-title-config.env" ~/.config/herdr-auto-title/config.env
+
 herdr server reload-config
 herdr plugin list
+
+# A plugin's startup process (auto-title) is launched by the server, not by
+# reload-config — start it now in case herdr was already running.
+herdr plugin action invoke herdr.auto-title.restart >/dev/null
