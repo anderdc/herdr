@@ -32,7 +32,13 @@ Prerequisites: `go` (auto-title builds from source; `mise use -g go@latest`), `c
 |---|---|---|
 | [vim-herdr-navigation](https://github.com/paulbkim-dev/vim-herdr-navigation) | `ctrl+h/j/k/l` moves between nvim splits, then crosses into herdr panes at the edge | Binds live in `config.toml` (`[[keys.command]]`). nvim side is in my nvim config (`lua/ander/plugins/init.lua` loads the plugin's `editor/nvim.lua`) |
 | [herdr-auto-title](https://github.com/kryptamine/herdr-auto-title) | Tab titles follow what each tab is doing | Needs `herdr integration install claude` current (see below). Optional `~/.config/herdr-auto-title/config.env` |
-| [herdr-mirror](https://github.com/nikok6/herdr-mirror) | Mirrors remote herdr servers into the local sidebar over ssh | `~/.config/herdr-mirror/hosts.toml`, **kept out of this repo** (public). Needs passwordless ssh: `ssh -o BatchMode=yes <host> true` |
+| [herdr-mirror](https://github.com/nikok6/herdr-mirror) | Mirrors remote herdr servers into the local sidebar over ssh | `~/.config/herdr-mirror/hosts.toml`, **kept out of this repo** (public). One `[hosts.<name>]` block per remote with `target = "<ssh alias>"`. Needs passwordless ssh: `ssh -o BatchMode=yes <host> true` |
+| [herdr-lazygit](https://github.com/Crokily/herdr-lazygit) | lazygit in a 42-col sidebar pane; `C` writes an AI commit message, `U` expands to the full layout | Binds in `config.toml`: `prefix+g` sidebar, `prefix+alt+g` own tab (the documented `prefix+shift+g` stays herdr's `new_worktree`). Needs `lazygit`. Remote note: `[[keys.command]]` binds don't apply with `herdr --remote` unless you attach with `--remote-keybindings server` |
+
+**Gotcha:** a plugin with a background process (auto-title) does not start from
+`herdr server reload-config` — its `startup` command runs when the herdr *server* starts. After
+installing mid-session, run its restart action once:
+`herdr plugin action invoke herdr.auto-title.restart`.
 
 Updating: `herdr plugin update <id>`, check it works, then bump the commit in
 `plugins.txt` (`herdr plugin list` prints the new one).
@@ -71,3 +77,4 @@ herdr integration install claude   # verify: herdr integration status → "claud
 | `b` | toggle sidebar |
 | `d` | detach |
 | `r` | reload this config |
+| `g` / `alt+g` | lazygit sidebar / lazygit in its own tab (plugin) |

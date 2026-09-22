@@ -3,3 +3,4 @@
 paulbkim-dev/vim-herdr-navigation@79679dacc791f70fc34de8b29a3cf9706c0f5b2f
 kryptamine/herdr-auto-title@27e04ccd1ac450de6d05c50c1560b2fa2c623d7b
 nikok6/herdr-mirror@195398c1275f9f3d18ddff70282149005a2bec01
+Crokily/herdr-lazygit@ac955e59caae5cbc34b74ccf949e11f085269b4d

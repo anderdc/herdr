@@ -85,6 +85,21 @@ type = "plugin_action"
 command = "vim-herdr-navigation.right"
 description = "navigate right (vim/herdr)"
 
+# Plugin: herdr-lazygit. prefix+g = open/focus/close the 42-col git sidebar (in lazygit:
+# C = AI commit message, U = expand to full layout). Own tab on prefix+alt+g instead of the
+# documented prefix+shift+g, which herdr keeps for new_worktree.
+[[keys.command]]
+key = "prefix+g"
+type = "plugin_action"
+command = "herdr-lazygit.open"
+description = "lazygit sidebar"
+
+[[keys.command]]
+key = "prefix+alt+g"
+type = "plugin_action"
+command = "herdr-lazygit.open-tab"
+description = "lazygit in its own tab"
+
 [theme]
 name = "gruvbox"
 auto_switch = false
