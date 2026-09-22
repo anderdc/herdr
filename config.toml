@@ -1,3 +1,4 @@
+onboarding = false
 # herdr configuration — keybindings mirrored from ~/.tmux.conf (prefix C-a, | / - splits,
 # prefix hjkl resize, prefix m zoom, prefix r reload, ctrl+hjkl navigation à la vim-tmux-navigator)
 
@@ -20,11 +21,13 @@ split_horizontal = "prefix+minus"
 # tmux: bind -r m resize-pane -Z (zoom toggle)
 zoom = "prefix+m"
 
-# vim-tmux-navigator: ctrl+hjkl focuses panes directly (no prefix)
-focus_pane_left = "ctrl+h"
-focus_pane_down = "ctrl+j"
-focus_pane_up = "ctrl+k"
-focus_pane_right = "ctrl+l"
+# vim-tmux-navigator: ctrl+hjkl (no prefix) is owned by the vim-herdr-navigation plugin
+# ([[keys.command]] at the end of [keys]) — moves between nvim splits inside nvim, herdr
+# panes everywhere else. Built-in pane focus is cleared so only the plugin binds fire.
+focus_pane_left = ""
+focus_pane_down = ""
+focus_pane_up = ""
+focus_pane_right = ""
 
 # tmux: bind -r h/j/k/l resize-pane by 5
 resize_pane_left = "prefix+h"
@@ -56,8 +59,34 @@ navigate_workspace_down = "j"
 navigate_pane_down = ""
 navigate_pane_up = ""
 
+# Plugin: vim-herdr-navigation. Needs the editor side too: ~/.config/nvim loads the
+# plugin's editor/nvim.lua from its vim-tmux-navigator spec.
+[[keys.command]]
+key = "ctrl+h"
+type = "plugin_action"
+command = "vim-herdr-navigation.left"
+description = "navigate left (vim/herdr)"
+
+[[keys.command]]
+key = "ctrl+j"
+type = "plugin_action"
+command = "vim-herdr-navigation.down"
+description = "navigate down (vim/herdr)"
+
+[[keys.command]]
+key = "ctrl+k"
+type = "plugin_action"
+command = "vim-herdr-navigation.up"
+description = "navigate up (vim/herdr)"
+
+[[keys.command]]
+key = "ctrl+l"
+type = "plugin_action"
+command = "vim-herdr-navigation.right"
+description = "navigate right (vim/herdr)"
+
 [theme]
-name = "one-dark"
+name = "gruvbox"
 auto_switch = false
 
 [ui]

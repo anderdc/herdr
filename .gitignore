@@ -3,3 +3,7 @@
 *.sock
 session.json
 .plugins.lock
+# plugins: code + build output + generated registry are machine-local; plugins.txt is the source of truth
+plugins/
+plugins.json
+release-notes.json

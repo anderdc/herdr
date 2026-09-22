@@ -15,7 +15,27 @@ cd ~/.config/herdr && git init -b main \
   && git fetch origin && git checkout -f -t origin/main
 
 herdr server reload-config   # or just start herdr
+./install-plugins.sh         # see Plugins below
 ```
+
+## Plugins
+
+`plugins.txt` is the source of truth: one `owner/repo@commit` per line, pinned to the
+commit tested here. `./install-plugins.sh` installs anything missing at that commit
+(skips what's already there) and reloads herdr. The installed code, build output and
+`plugins.json` registry under `plugins/` are machine-local and gitignored.
+
+Prerequisites: `go` (auto-title builds from source; `mise use -g go@latest`), `curl`,
+`jq`.
+
+| Plugin | What it does | Extra setup |
+|---|---|---|
+| [vim-herdr-navigation](https://github.com/paulbkim-dev/vim-herdr-navigation) | `ctrl+h/j/k/l` moves between nvim splits, then crosses into herdr panes at the edge | Binds live in `config.toml` (`[[keys.command]]`). nvim side is in my nvim config (`lua/ander/plugins/init.lua` loads the plugin's `editor/nvim.lua`) |
+| [herdr-auto-title](https://github.com/kryptamine/herdr-auto-title) | Tab titles follow what each tab is doing | Needs `herdr integration install claude` current (see below). Optional `~/.config/herdr-auto-title/config.env` |
+| [herdr-mirror](https://github.com/nikok6/herdr-mirror) | Mirrors remote herdr servers into the local sidebar over ssh | `~/.config/herdr-mirror/hosts.toml`, **kept out of this repo** (public). Needs passwordless ssh: `ssh -o BatchMode=yes <host> true` |
+
+Updating: `herdr plugin update <id>`, check it works, then bump the commit in
+`plugins.txt` (`herdr plugin list` prints the new one).
 
 ## Claude Code detection fix (required, lives outside this repo)
 
@@ -46,7 +66,7 @@ herdr integration install claude   # verify: herdr integration status → "claud
 | `w` then `j`/`k` | flip spaces (vim style) |
 | `\|` / `-` | split side-by-side / stacked |
 | `h j k l` | resize pane |
-| `ctrl+h/j/k/l` (no prefix) | focus pane (vim-tmux-navigator style) |
+| `ctrl+h/j/k/l` (no prefix) | move across nvim splits and herdr panes (vim-herdr-navigation plugin) |
 | `m` | zoom pane |
 | `b` | toggle sidebar |
 | `d` | detach |
