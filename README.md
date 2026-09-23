@@ -99,6 +99,11 @@ herdr machine list
 Saved machines hold only a label, SSH target, session name and enabled state —
 credentials stay with OpenSSH.
 
+A saved machine shows up in the local sidebar next to Local. A workspace created
+while it is selected (or with `herdr --machine ventura workspace create`) lives
+on the **remote** server, so it keeps running after the local client closes or
+the laptop shuts down, and it is there again on the next `herdr`.
+
 Gotchas:
 
 - You attach to the **remote's** server, so its `config.toml` and its plugins
@@ -108,6 +113,53 @@ Gotchas:
   `--remote-keybindings server`, which uses the remote's config instead.
 - Two people attaching as the same remote user land in the same session. Give
   each person their own `--session <name>` if that is not what you want.
+
+### Keeping the remote server up across reboots
+
+The remote server outlives SSH disconnects on its own, as long as logind's
+`KillUserProcesses` is `no`, which is the Debian default. It does **not** come back
+after the box reboots unless systemd starts it. One-time setup on the remote:
+
+```bash
+sudo loginctl enable-linger $USER          # user manager runs without a login
+mkdir -p ~/.config/systemd/user
+# write ~/.config/systemd/user/herdr.service (below), then:
+systemctl --user daemon-reload
+systemctl --user enable herdr.service      # enable, not --now: see gotcha
+```
+
+```ini
+[Unit]
+Description=herdr server (default session)
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/herdr server
+WorkingDirectory=%h
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=SHELL=/bin/bash
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+```
+
+`herdr server` runs in the foreground, so `Type=simple` is right. The `PATH` line
+matters because systemd's environment lacks `~/.local/bin`, and the panes inherit
+it.
+
+Gotchas:
+
+- If a herdr server is already running (one started by a client attach),
+  starting the unit too would put two servers on the same session socket (not
+  tested). Enable the unit and let the next reboot hand the server over to
+  systemd. The other way is `herdr server stop` and then `start`, but that kills
+  every pane.
+- `systemctl --user` over Tailscale SSH fails with `Failed to lookup
+  RuntimeDirectory path` because the session has no `XDG_RUNTIME_DIR`. Set it
+  first with `export XDG_RUNTIME_DIR=/run/user/$(id -u)`.
 
 ## Keybinding cheat sheet (prefix = ctrl+a)
 
