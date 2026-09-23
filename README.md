@@ -25,14 +25,13 @@ commit tested here. `./install-plugins.sh` installs anything missing at that com
 (skips what's already there) and reloads herdr. The installed code, build output and
 `plugins.json` registry under `plugins/` are machine-local and gitignored.
 
-Prerequisites: `go` (auto-title builds from source; `mise use -g go@latest`), `curl`,
+Prerequisites: `go` (auto-title builds from source; `mise use -g go@latest`) and
 `jq`.
 
 | Plugin | What it does | Extra setup |
 |---|---|---|
 | [vim-herdr-navigation](https://github.com/paulbkim-dev/vim-herdr-navigation) | `ctrl+h/j/k/l` moves between nvim splits, then crosses into herdr panes at the edge | Binds live in `config.toml` (`[[keys.command]]`). nvim side is in my nvim config (`lua/ander/plugins/init.lua` loads the plugin's `editor/nvim.lua`) |
 | [herdr-auto-title](https://github.com/kryptamine/herdr-auto-title) | Tab titles follow what each tab is doing | Needs `herdr integration install claude` current (see below). Settings in `auto-title-config.env` here, symlinked by `install-plugins.sh` to `~/.config/herdr-auto-title/config.env`: 28-column titles, no `claude ›` prefix (the sidebar shows the vendor), no position prefix (it is counted against the 28, and the sidebar already prefixes the workspace name) |
-| [herdr-mirror](https://github.com/nikok6/herdr-mirror) | Mirrors remote herdr servers into the local sidebar over ssh | `~/.config/herdr-mirror/hosts.toml`, **kept out of this repo** (public). One `[hosts.<name>]` block per remote with `target = "<ssh alias>"`. Needs passwordless ssh: `ssh -o BatchMode=yes <host> true` |
 | [herdr-lazygit](https://github.com/Crokily/herdr-lazygit) | lazygit in a 42-col sidebar pane; `C` writes an AI commit message, `U` expands to the full layout | Binds in `config.toml`: `prefix+g` sidebar, `prefix+alt+g` own tab (the documented `prefix+shift+g` stays herdr's `new_worktree`). Needs `lazygit`. Remote note: `[[keys.command]]` binds don't apply with `herdr --remote` unless you attach with `--remote-keybindings server` |
 
 **Gotcha:** a plugin with a background process (auto-title) does not start from
@@ -68,12 +67,20 @@ is named `claude` and detection works unaided — `HERDR_AGENT` is unset here an
 `herdr pane current` still reports `"agent": "claude"`. The wrapper is gone from
 both rc files. Put it back only on a machine using the native installer.
 
-## Remote machines (`herdr --remote`)
+## Remote machines (saved machines / `herdr --remote`)
 
-Core herdr, not a plugin: `herdr --remote <ssh-target>` attaches to a herdr
-server running on another box over SSH. **Nothing in this repo is needed for
-it**, and it has nothing to do with herdr-mirror's `hosts.toml` — that file is
-only for mirroring remote servers into the local sidebar.
+Core herdr, not a plugin. **Nothing in this repo is needed for it.** There are two
+ways in:
+
+- **Saved machine (what I use).** The remote box gets its own group in the local
+  sidebar next to Local, with its workspaces and agents in one window. See below.
+- **`herdr --remote <ssh-target>`** attaches this whole client to the remote
+  server. It is for one-off use and for first-time setup prompts.
+
+(Earlier this repo used the [herdr-mirror](https://github.com/nikok6/herdr-mirror)
+plugin for the sidebar view. It came out once herdr 0.9 shipped saved machines.
+One thing to know if you ever go back to it: by default, closing a mirror locally
+also closed the workspace on the remote.)
 
 ```bash
 herdr --remote ventura                   # attach
@@ -89,12 +96,19 @@ What it needs:
   remote installation on first connect, and an incompatible or missing one needs
   approval in an interactive terminal.
 
-To keep a box in the sidebar instead of retyping the target:
+To keep a box in the sidebar instead of retyping the target (run it once, in an
+interactive terminal, because it may ask before installing or updating the remote):
 
 ```bash
-herdr machine add <ssh-target> --label ventura
-herdr machine list
+herdr machine add ventura --label ventura
+herdr machine list                          # id, label, target, session, enabled
+herdr --machine ventura workspace list      # CLI against the box, no TUI needed
+herdr --machine ventura workspace create
 ```
+
+Background reconnects can't prompt for a key passphrase, so `ssh-add` first. If
+the machine shows **Attention**, run `herdr --remote ventura` once in a terminal
+to answer the prompt, then restart the client.
 
 Saved machines hold only a label, SSH target, session name and enabled state —
 credentials stay with OpenSSH.

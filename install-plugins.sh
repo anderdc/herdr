@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Install every plugin in plugins.txt at its pinned commit, then reload herdr.
-# Needs: go (herdr-auto-title builds from source), curl (herdr-mirror downloads a release),
+# Needs: go (herdr-auto-title builds from source),
 # jq (vim-herdr-navigation detects vim panes with it).
 set -euo pipefail
 cd "$(dirname "$0")"
