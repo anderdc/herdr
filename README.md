@@ -1,7 +1,7 @@
 # herdr config
 
 My [herdr](https://herdr.dev) setup — keybindings mirrored from my tmux/nvim muscle
-memory, plus the Claude Code detection fix. Lives at `~/.config/herdr`.
+memory, pinned plugins, and the Claude Code session hook. Lives at `~/.config/herdr`.
 
 ## New machine
 
@@ -31,7 +31,7 @@ Prerequisites: `go` (auto-title builds from source; `mise use -g go@latest`), `c
 | Plugin | What it does | Extra setup |
 |---|---|---|
 | [vim-herdr-navigation](https://github.com/paulbkim-dev/vim-herdr-navigation) | `ctrl+h/j/k/l` moves between nvim splits, then crosses into herdr panes at the edge | Binds live in `config.toml` (`[[keys.command]]`). nvim side is in my nvim config (`lua/ander/plugins/init.lua` loads the plugin's `editor/nvim.lua`) |
-| [herdr-auto-title](https://github.com/kryptamine/herdr-auto-title) | Tab titles follow what each tab is doing | Needs `herdr integration install claude` current (see below). Settings in `auto-title-config.env` here, symlinked by `install-plugins.sh` to `~/.config/herdr-auto-title/config.env`: 28-column titles, no `claude ›` prefix (the sidebar shows the vendor), position kept |
+| [herdr-auto-title](https://github.com/kryptamine/herdr-auto-title) | Tab titles follow what each tab is doing | Needs `herdr integration install claude` current (see below). Settings in `auto-title-config.env` here, symlinked by `install-plugins.sh` to `~/.config/herdr-auto-title/config.env`: 28-column titles, no `claude ›` prefix (the sidebar shows the vendor), no position prefix (it is counted against the 28, and the sidebar already prefixes the workspace name) |
 | [herdr-mirror](https://github.com/nikok6/herdr-mirror) | Mirrors remote herdr servers into the local sidebar over ssh | `~/.config/herdr-mirror/hosts.toml`, **kept out of this repo** (public). One `[hosts.<name>]` block per remote with `target = "<ssh alias>"`. Needs passwordless ssh: `ssh -o BatchMode=yes <host> true` |
 | [herdr-lazygit](https://github.com/Crokily/herdr-lazygit) | lazygit in a 42-col sidebar pane; `C` writes an AI commit message, `U` expands to the full layout | Binds in `config.toml`: `prefix+g` sidebar, `prefix+alt+g` own tab (the documented `prefix+shift+g` stays herdr's `new_worktree`). Needs `lazygit`. Remote note: `[[keys.command]]` binds don't apply with `herdr --remote` unless you attach with `--remote-keybindings server` |
 
@@ -43,24 +43,71 @@ installing mid-session, run its restart action once:
 Updating: `herdr plugin update <id>`, check it works, then bump the commit in
 `plugins.txt` (`herdr plugin list` prints the new one).
 
-## Claude Code detection fix (required, lives outside this repo)
+## Claude Code session hook (required, lives outside this repo)
 
-Claude Code's native installer runs a versioned binary
-(`~/.local/share/claude/versions/N`), so herdr's process-name detection never
-sees "claude" and panes stay `unknown` / missing from Agents. Add to
-`~/.bashrc` **and** `~/.zshrc`:
-
-```bash
-# herdr: Claude Code's native installer runs a versioned binary (~/.local/share/claude/versions/N),
-# so herdr's process-name detection can't identify it. HERDR_AGENT hints the manifest to apply.
-claude() { HERDR_AGENT=claude command claude "$@"; }
-```
-
-Then install the session-identity hook (registers in `~/.claude/settings.json`):
+Install the session-identity hook, which registers in `~/.claude/settings.json`:
 
 ```bash
 herdr integration install claude   # verify: herdr integration status → "claude: current"
 ```
+
+It is what gives a pane an `agent_session` (`herdr pane current` →
+`"source": "herdr:claude"`). Without it herdr can see a `claude` process but not
+which session it is, so auto-title has nothing to name the tab after.
+
+### No longer needed: the `claude()` shell wrapper
+
+Claude Code's **native** installer runs a versioned binary
+(`~/.local/share/claude/versions/N`), whose process name is the version number,
+so herdr's process-name detection never saw `claude` and panes stayed `unknown`.
+The workaround was a `~/.bashrc`/`~/.zshrc` wrapper exporting `HERDR_AGENT=claude`.
+
+This machine installs Claude through mise
+(`~/.local/share/mise/installs/claude/<version>/claude`), so the process really
+is named `claude` and detection works unaided — `HERDR_AGENT` is unset here and
+`herdr pane current` still reports `"agent": "claude"`. The wrapper is gone from
+both rc files. Put it back only on a machine using the native installer.
+
+## Remote machines (`herdr --remote`)
+
+Core herdr, not a plugin: `herdr --remote <ssh-target>` attaches to a herdr
+server running on another box over SSH. **Nothing in this repo is needed for
+it**, and it has nothing to do with herdr-mirror's `hosts.toml` — that file is
+only for mirroring remote servers into the local sidebar.
+
+```bash
+herdr --remote ventura                   # attach
+herdr --remote ventura --session work    # a named persistent session there
+```
+
+What it needs:
+
+- herdr installed locally (https://herdr.dev).
+- Working SSH to the box: `ssh <target> true`. `ventura` is an alias in my
+  `~/.ssh/config`, not something this repo ships — use your own host or alias.
+- herdr on the remote, which you do **not** install by hand: herdr prepares the
+  remote installation on first connect, and an incompatible or missing one needs
+  approval in an interactive terminal.
+
+To keep a box in the sidebar instead of retyping the target:
+
+```bash
+herdr machine add <ssh-target> --label ventura
+herdr machine list
+```
+
+Saved machines hold only a label, SSH target, session name and enabled state —
+credentials stay with OpenSSH.
+
+Gotchas:
+
+- You attach to the **remote's** server, so its `config.toml` and its plugins
+  are what run there.
+- `[[keys.command]]` binds (ctrl+hjkl navigation, `prefix+g` lazygit) are
+  local-client binds and do not apply over `--remote` unless you attach with
+  `--remote-keybindings server`, which uses the remote's config instead.
+- Two people attaching as the same remote user land in the same session. Give
+  each person their own `--session <name>` if that is not what you want.
 
 ## Keybinding cheat sheet (prefix = ctrl+a)
 
@@ -68,7 +115,7 @@ herdr integration install claude   # verify: herdr integration status → "claud
 |---|---|
 | `c` | new space (workspace) |
 | `t` / `x` / `shift+x` | new tab / close tab / close pane |
-| `n` / `p` / `1..9` | next / prev / jump tab |
+| `n` / `p` / `1..9` | next / prev / jump tab (the tab bar no longer prints the number — auto-title's position prefix is off) |
 | `w` then `j`/`k` | flip spaces (vim style) |
 | `\|` / `-` | split side-by-side / stacked |
 | `h j k l` | resize pane |
