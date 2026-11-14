@@ -32,7 +32,7 @@ Prerequisites: `go` (auto-title builds from source; `mise use -g go@latest`) and
 |---|---|---|
 | [vim-herdr-navigation](https://github.com/paulbkim-dev/vim-herdr-navigation) | `ctrl+h/j/k/l` moves between nvim splits, then crosses into herdr panes at the edge | Binds live in `config.toml` (`[[keys.command]]`). nvim side is in my nvim config (`lua/ander/plugins/init.lua` loads the plugin's `editor/nvim.lua`) |
 | [herdr-auto-title](https://github.com/kryptamine/herdr-auto-title) | Tab titles follow what each tab is doing | Needs `herdr integration install claude` current (see below). Settings in `auto-title-config.env` here, symlinked by `install-plugins.sh` to `~/.config/herdr-auto-title/config.env`: 28-column titles, no `claude ›` prefix (the sidebar shows the vendor), no position prefix (it is counted against the 28, and the sidebar already prefixes the workspace name) |
-| [herdr-lazygit](https://github.com/Crokily/herdr-lazygit) | lazygit in a 42-col sidebar pane; `C` writes an AI commit message, `U` expands to the full layout | Binds in `config.toml`: `prefix+g` sidebar, `prefix+alt+g` own tab (the documented `prefix+shift+g` stays herdr's `new_worktree`). Needs `lazygit`. Remote note: `[[keys.command]]` binds don't apply with `herdr --remote` unless you attach with `--remote-keybindings server` |
+| [herdr-lazygit](https://github.com/Crokily/herdr-lazygit) | lazygit in a 42-col sidebar pane; `C` writes an AI commit message, `U` expands to the full layout | Installed but not bound to a key: `prefix+g` is herdr's go-to again. To use it, add a `[[keys.command]]` bind for `herdr-lazygit.open` (sidebar) or `herdr-lazygit.open-tab` in `config.toml`. Needs `lazygit` |
 
 **Gotcha:** a plugin with a background process (auto-title) does not start from
 `herdr server reload-config` — its `startup` command runs when the herdr *server* starts. After
@@ -122,7 +122,7 @@ Gotchas:
 
 - You attach to the **remote's** server, so its `config.toml` and its plugins
   are what run there.
-- `[[keys.command]]` binds (ctrl+hjkl navigation, `prefix+g` lazygit) are
+- `[[keys.command]]` binds (ctrl+hjkl navigation) are
   local-client binds and do not apply over `--remote` unless you attach with
   `--remote-keybindings server`, which uses the remote's config instead.
 - Two people attaching as the same remote user land in the same session. Give
@@ -190,4 +190,4 @@ Gotchas:
 | `b` | toggle sidebar |
 | `d` | detach |
 | `r` | reload this config |
-| `g` / `alt+g` | lazygit sidebar / lazygit in its own tab (plugin) |
+| `g` | go-to (navigate mode) |

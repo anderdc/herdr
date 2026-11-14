@@ -52,6 +52,7 @@ focus_agent = "prefix+alt+1..9"
 
 # Navigate mode (opened via prefix+w / prefix+g): vim-style j/k to flip workspaces.
 # Arrows still work (left/right always focus panes, up/down workspaces).
+goto = "prefix+g"
 navigate_workspace_up = "k"
 navigate_workspace_down = "j"
 # j/k default to pane down/up in navigate mode — cleared so they belong to workspaces
@@ -84,21 +85,6 @@ key = "ctrl+l"
 type = "plugin_action"
 command = "vim-herdr-navigation.right"
 description = "navigate right (vim/herdr)"
-
-# Plugin: herdr-lazygit. prefix+g = open/focus/close the 42-col git sidebar (in lazygit:
-# C = AI commit message, U = expand to full layout). Own tab on prefix+alt+g instead of the
-# documented prefix+shift+g, which herdr keeps for new_worktree.
-[[keys.command]]
-key = "prefix+g"
-type = "plugin_action"
-command = "herdr-lazygit.open"
-description = "lazygit sidebar"
-
-[[keys.command]]
-key = "prefix+alt+g"
-type = "plugin_action"
-command = "herdr-lazygit.open-tab"
-description = "lazygit in its own tab"
 
 [theme]
 name = "gruvbox"
