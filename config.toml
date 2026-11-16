@@ -94,3 +94,11 @@ auto_switch = false
 # tmux-style splits: shared divider lines, no gaps, no outer frame
 pane_gaps = false
 pane_outer_borders = false
+
+[ui.toast]
+# notifications as in-app toasts only (not desktop/OS popups); other values: terminal, system, off
+delivery = "herdr"
+delay_seconds = 1
+
+[ui.toast.herdr]
+position = "bottom-right"
